@@ -8,49 +8,38 @@
           class="btn btn-primary add"
           @click="$bvModal.show('add')"
         >
-          Add New Language
+          Add extra meal
         </button>
         <br />
-        <!-- add category -->
+        <!-- show image modal -->
+        <div
+          class="modal fade"
+          style="margin-top: 10rem"
+          id="showImage"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="showImageLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <img :src="imageShow" alt />
+            </div>
+          </div>
+        </div>
+        <!-- end show image modal -->
+        <!-- add extra meal -->
         <b-modal id="add" hide-footer>
             <div class="mb-3">
-            <label><span style="color: red">* </span>title</label>
-            <b-form-input
-            v-model="formAdd.title"
-            placeholder="Enter Title"
-            ></b-form-input>
+            <label><span style="color: red">* </span>Image</label>
+            <b-form-file
+            v-model="formAdd.image"
+            :state="Boolean(formAdd.image)"
+            placeholder="Choose a image or drop it here..."
+            drop-placeholder="Drop image here..."
+            ></b-form-file>
             </div>
-            <div class="mb-3">
-            <label><span style="color: red">* </span>Description</label>
-            <b-form-input
-            v-model="formAdd.description"
-            placeholder="Enter Description"
-            ></b-form-input>
-            </div>
-              <b-col>
-                <b-form-group
-                  id="input-group-3"
-                  label="Choose Language Name :"
-                  label-for="input-3"
-                >
-                  <b-form-select
-                    id="input-3"
-                    v-model="formAdd.lang_id"
-                    :options="languages"
-                    required
-                  ></b-form-select>
-                </b-form-group>
-              </b-col>
             <div class="form-group submit-form">
-            <button
-            type="button"
-            class="btn btn-secondary"
-            id="close"
-            @click="$bvModal.hide('add')"
-            data-dismiss="modal"
-            >
-            Close
-            </button>
             <button
             class="btn btn-primary submit-button"
             type="submit"
@@ -60,38 +49,19 @@
             </button>
           </div>
         </b-modal>
-        <!-- end of add category -->
-        <!-- edit category -->
+        <!-- end of add extra meal -->
+        <!-- edit extra meal -->
         <b-modal id="update" hide-footer>
             <div class="mb-3">
-            <label><span style="color: red">* </span>title</label>
-            <b-form-input
-            v-model="formEdit.title"
-            placeholder="Enter Title"
-            ></b-form-input>
+            <label><span style="color: red">* </span>Image</label>
+            <b-form-file
+            v-model="formEdit.image"
+            :state="Boolean(formEdit.image)"
+            placeholder="Choose a image or drop it here..."
+            drop-placeholder="Drop image here..."
+            ></b-form-file>
             </div>
-            <div class="mb-3">
-            <label><span style="color: red">* </span>Description</label>
-            <b-form-input
-            v-model="formEdit.description"
-            placeholder="Enter Description"
-            ></b-form-input>
-            </div>
-              <b-col>
-                <b-form-group
-                  id="input-group-3"
-                  label="Choose Language Name :"
-                  label-for="input-3"
-                >
-                  <b-form-select
-                    id="input-3"
-                    v-model="formEdit.lang_id"
-                    :options="languages"
-                    required
-                  ></b-form-select>
-                </b-form-group>
-              </b-col>
-          <div class="form-group submit-form">
+            <div class="form-group submit-form">
             <button
               class="btn btn-primary submit-button"
               type="submit"
@@ -101,7 +71,7 @@
             </button>
           </div>
         </b-modal>
-        <!-- end of edit category -->
+        <!-- end of edit extra meal -->
         <!-- delete modal -->
         <div
           class="modal fade"
@@ -129,6 +99,14 @@
                   هل حقا ترغب في حذف العنصر ؟
                 </h3>
                 <div class="form-group form-delete">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="close-delete"
+                    data-dismiss="modal"
+                  >
+                    Close
+                  </button>
                   <b-button
                     variant="outline-danger"
                     class="delete-btn"
@@ -145,7 +123,7 @@
       <b-col sm="12">
         <iq-card>
           <template v-slot:headerTitle>
-            <h4 class="card-title">Category languages</h4>
+            <h4 class="card-title">Category meals</h4>
           </template>
           <template v-slot:headerAction>
             <a
@@ -164,19 +142,22 @@
             </b-collapse>
             <b-table-simple responsive>
               <b-thead>
-                <b-th>title</b-th>
-                <b-th>description</b-th>
-                <b-th>lang name</b-th>
+                <b-th>image</b-th>
                 <b-th>created at</b-th>
                 <b-th>action</b-th>
               </b-thead>
               <b-tbody>
                 <b-tr v-for="(item, index) in items" :key="index">
                   <b-td>
-                      {{ item.title }}
+                    <img
+                      :src="'http://localhost:8000/storage/' + item.image"
+                      class="image-url"
+                      data-toggle="modal"
+                      data-target="#showImage"
+                      v-on:click="imageUrl(item.image)"
+                      alt
+                    /> 
                   </b-td>
-                  <b-td>{{ item.description }}</b-td>
-                  <b-td>{{ item.lang.name }}</b-td> 
                   <b-td>{{ item.created_at }}</b-td>
                   <b-td>
                     <template>
@@ -207,33 +188,6 @@
               </b-tbody>
             </b-table-simple>
           </template>
-          <b-pagination
-            style="float: right"
-            v-model="currentPage"
-            :total-rows="rows"
-            :per-page="perPage"
-            class="mt-4"
-          >
-            <template #first-text
-              ><span class="text-success">First</span></template
-            >
-            <template #prev-text
-              ><span class="text-danger">Prev</span></template
-            >
-            <template #next-text
-              ><span class="text-warning">Next</span></template
-            >
-            <template #last-text><span class="text-info">Last</span></template>
-            <template #ellipsis-text>
-              <b-spinner small type="grow"></b-spinner>
-              <b-spinner small type="grow"></b-spinner>
-              <b-spinner small type="grow"></b-spinner>
-            </template>
-            <template #page="{ page, active }">
-              <b v-if="active">{{ page }}</b>
-              <i v-else>{{ page }}</i>
-            </template>
-          </b-pagination>
         </iq-card>
       </b-col>
     </b-row>
@@ -247,7 +201,6 @@ export default {
   name: 'AgeRange',
   components: { Loader },
   created () {
-    this.getLanguages()
     this.getAllItems()
   },
   mounted () {
@@ -262,17 +215,12 @@ export default {
   },
   data () {
     return {
-      logo: '',
-      languages: [],
-      searchByName: '',
-      searchByTitle: '',
+      meals: [],
+      imageShow: "",
       loader: false,
-      perPage: 10,
-      currentPage: 1,
-      rows: 0,
       formAdd:[],
       formEdit: [],
-      formEditlang: [],
+      formEditExtra: [],
       items: [],
       id: null,
     }
@@ -288,46 +236,39 @@ export default {
       this.formEdit = item
       this.$bvModal.show('update')
     },
+    imageUrl (image) {
+      this.imageShow = 'http://localhost:8000/storage/' + image
+    },
     async create () {
-      let data = new FormData()
-      if (this.addValidater().status === 400) {
-        this.$swal('خطأ في الادخال', this.addValidater().message, 'error')
-      } else {
-        data.append('title', this.formAdd.title)
-        data.append('description', this.formAdd.description)
-        data.append('lang_id', this.formAdd.lang_id)
-        data.append('tbable_id', this.$route.params.id)
-        this.loader = true
-        await this.axios
-          .post('category/lang', data)
-          .then(() => {
-            this.getAllItems()
-            this.loader = false
-            this.$swal(' تم اضافة المستخدم بنجاح', 'تم نجاح العملية', 'success')
-          })
-          .catch((res) => {
-            this.loader = false
-            if (res.response.status === 400) {
-                this.$swal('خطاء في الارسال', 'هذه اللغة مستخدمة', 'error')
-            }else{
+        console.log()
+        let data = new FormData()
+        if (this.addValidater().status === 400) {
+            this.$swal('خطأ في الادخال', this.addValidater().message, 'error')
+        } else {
+            data.append('meal_id', this.$route.params.id)
+            data.append('image', this.formAdd.image)
+            this.loader = true
+            await this.axios
+            .post('extra/meal', data)
+            .then(() => {
+                this.getAllItems()
+                this.loader = false
+                this.$swal(' تم اضافة المستخدم بنجاح', 'تم نجاح العملية', 'success')
+            })
+            .catch((res) => {
+                this.loader = false
                 this.$swal('يوجد خلل فني', 'خطاء في الارسال', 'error')
-            }
-          })
-      }
+            })
+        }
     },
     async update () {
         let data = new FormData()
-        this.editValidater()
-        Object.keys(this.formEditlang).forEach((key) => {
-            if (this.formEditlang[key] || this.formEditlang[key] !== '') {
-            data.append(key, this.formEditlang[key])
-            }
-        })
-        data.append('tbable_id', this.$route.params.id)
+        data.append('image', this.formEdit.image)
+        data.append('meal_id', this.$route.params.id)
         data.append('_method', 'PUT')
         this.loader = true
         await this.axios
-        .post(`category/lang/${this.formEdit.id}`, data)
+        .post(`extra/meal/${this.formEdit.id}`, data)
         .then(() => {
             this.getAllItems()
             this.$bvModal.hide('update')
@@ -347,7 +288,7 @@ export default {
         this.loader = true 
         this.axios
         .get(
-          `category/lang/${this.$route.params.id}`
+          `meal/extra/${this.$route.params.id}`
         )
         .then((res) => {
           this.items = res.data
@@ -357,22 +298,10 @@ export default {
           this.loader = false 
         })
     },
-    getLanguages () {
-      this.axios
-        .get(
-          `language?take=1000&skip=0`
-        )
-        .then((res) => {
-          res.data.items.forEach((item) => {
-            this.languages.push({ text: item.name, value: item.id })
-          })
-        })
-        .catch(() => {})
-    },
     deleteItem () {
       this.loader = true
       this.axios
-        .delete(`lang/body/${this.id}`)
+        .delete(`extra/meal/${this.id}`)
         .then((res) => {
           this.closeDeleteModal()
           this.getAllItems()
@@ -392,35 +321,14 @@ export default {
         status: null,
         message: ''
       }
-      if (!this.formAdd.title) {
+      if (!this.formAdd.image) {
         dataError.status = 400
-        dataError.message = 'يرجى اضافة عنوان'
-        return dataError
-      }
-      if (!this.formAdd.description) {
-        dataError.status = 400
-        dataError.message = 'يرجى اضافة تفاصيل '
-        return dataError
-      }
-      if (!this.formAdd.lang_id) {
-        dataError.status = 400
-        dataError.message = 'يرجى اختيار اللغة'
+        dataError.message = 'يرجى اضافة صورة '
         return dataError
       }
       dataError.status = 200
       dataError.message = 'success'
       return dataError
-    },
-    editValidater () {
-      if (this.formEdit.title) {
-        this.formEditlang.title = this.formEdit.title
-      }
-      if (this.formEdit.description) {
-        this.formEditlang.description = this.formEdit.description
-      }
-      if (this.formEdit.lang_id) {
-        this.formEditlang.lang_id = this.formEdit.lang_id
-      }
     }
   }
 }
